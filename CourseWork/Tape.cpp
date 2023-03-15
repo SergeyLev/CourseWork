@@ -1,55 +1,8 @@
 #pragma once
-#include<iostream>
 #include"Tape.h"
-#include<fstream>
-#include<string>
-#include<cstdio>
-#include<tuple>
-#include <algorithm>
-#include <iomanip>
-
 using namespace std;
 
 const string filename = "tapes.dat";
-
-tuple<Tape*, int> readTapeFile() {
-	ifstream file;
-	file.open(filename, ios::binary);
-	if (!file) {
-		cout << "File doesn't exist, creating a new file.\n";
-		fstream f;
-		f.open(filename, fstream::in | fstream::out | fstream::trunc);
-		f.close();
-		Tape* t = new Tape[0];
-		return make_tuple(t, 0);
-	}
-	else {
-		file.seekg(0, ios::end);
-		int tapeSize = file.tellg(); 
-		tapeSize = tapeSize / sizeof(Tape);
-		file.seekg(0, ios::beg);
-
-		Tape* tapes = new Tape[tapeSize];
-		file.read((char*)tapes, tapeSize * sizeof(Tape));
-		file.close();
-		cout << endl;
-
-		return make_tuple(tapes, tapeSize);
-	}	
-};
-
-void writeTapeFile(struct Tape *tape) {
-	ofstream file;
-	file.open(filename, ios::binary | ios::app);
-
-	if (!file) {
-		cout << "File could not be loaded\n";
-	}
-	else {
-		file.write((char*)tape, sizeof(Tape));		
-	}
-	file.close();
-}
 
 void truncateTapeFile() {
 	ofstream file;
@@ -70,8 +23,8 @@ void showAllTape() {
 	string tapeID = separator + "Tape ID";
 	string title = separator + "Title";
 	string amount = separator + "Ammount |";
-	
-	tie(tapes, tapesSize) = readTapeFile();
+
+	tie(tapes, tapesSize) = readFile<Tape>(tapesFilename);
 
 	// Get sizes to construct table
 	tapeIdSize = tapeID.size() - separator.size();
@@ -110,7 +63,7 @@ void addNewTape() {
 	bool sortById = false;
 	
 	// Auto generate ID	
-	tie(tapes, tapesSize) = readTapeFile();	
+	tie(tapes, tapesSize) = readFile<Tape>(tapesFilename);
 	if (tapesSize == 0) { newID = 1; }
 	else if (tapesSize == 1) { newID = tapes[0].ID + 1; }
 
@@ -131,7 +84,8 @@ void addNewTape() {
 	
 	// Save to file
 	if (!sortById) {
-		writeTapeFile(newTape);
+
+		writeToFile<Tape>(newTape, tapesFilename);		
 		system("cls");
 		cout << "New title: \"" << newTape->title << "\" added to the database." << endl;
 	}
@@ -140,10 +94,11 @@ void addNewTape() {
 		for (int i = 0; i < tapesSize; i++) {
 			for (int j = 0; j < tapesSize; j++) {
 				if (tapes[j].ID - 1 == i) {
-					writeTapeFile(&tapes[j]);
+
+					writeToFile<Tape>(newTape, tapesFilename);					
 				}
 				else if (newTape->ID - 1 == i) {
-					writeTapeFile(newTape);
+					writeToFile<Tape>(newTape, tapesFilename);					
 				}
 			}
 		}
@@ -161,7 +116,7 @@ void deleteTape() {
 	Tape *tapes;
 	bool deleteTape = false;
 
-	tie(tapes, tapesSize) = readTapeFile();
+	tie(tapes, tapesSize) = readFile<Tape>(tapesFilename);
 	showAllTape();
 		
 	cout << "Enter ID of the tape you want to delete: "; cin >> ID;
@@ -178,7 +133,7 @@ void deleteTape() {
 		truncateTapeFile();
 		for (int i = 0; i < tapesSize; i++) {
 			if (tapes[i].ID != ID) {
-				writeTapeFile(&tapes[i]);
+				writeToFile<Tape>(&tapes[i], tapesFilename);
 			}
 		}	
 	}

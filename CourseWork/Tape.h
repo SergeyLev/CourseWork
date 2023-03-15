@@ -1,11 +1,12 @@
 #pragma once
+#include<iostream>
+#include<cstdio>
+#include <algorithm>
+#include <iomanip>
+#include"Constant.h"
+#include"File.cpp"
 
-struct Tape {
-	int ID;
-	char title[100];
-	int ammount;
-};
-
+void truncateTapeFile();
 void showAllTape();
 void addNewTape();
 void deleteTape();
