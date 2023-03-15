@@ -2,13 +2,6 @@
 #include"Tape.h"
 using namespace std;
 
-const string filename = "tapes.dat";
-
-void truncateTapeFile() {
-	ofstream file;
-	file.open("tapes.dat", ios::binary | ios::trunc);
-	file.close();
-}
 
 //SHOW ALL AVAILABLE TAPES
 void showAllTape() {
@@ -24,7 +17,7 @@ void showAllTape() {
 	string title = separator + "Title";
 	string amount = separator + "Ammount |";
 
-	tie(tapes, tapesSize) = readFile<Tape>(tapesFilename);
+	tie(tapes, tapesSize) = readFile(new Tape, tapesFilename);
 
 	// Get sizes to construct table
 	tapeIdSize = tapeID.size() - separator.size();
@@ -63,7 +56,7 @@ void addNewTape() {
 	bool sortById = false;
 	
 	// Auto generate ID	
-	tie(tapes, tapesSize) = readFile<Tape>(tapesFilename);
+	tie(tapes, tapesSize) = readFile(new Tape, tapesFilename);
 	if (tapesSize == 0) { newID = 1; }
 	else if (tapesSize == 1) { newID = tapes[0].ID + 1; }
 
@@ -85,20 +78,20 @@ void addNewTape() {
 	// Save to file
 	if (!sortById) {
 
-		writeToFile<Tape>(newTape, tapesFilename);		
+		writeToFile(newTape, tapesFilename);		
 		system("cls");
 		cout << "New title: \"" << newTape->title << "\" added to the database." << endl;
 	}
 	else {
-		truncateTapeFile();
+		truncateFile(tapesFilename);
 		for (int i = 0; i < tapesSize; i++) {
 			for (int j = 0; j < tapesSize; j++) {
 				if (tapes[j].ID - 1 == i) {
 
-					writeToFile<Tape>(newTape, tapesFilename);					
+					writeToFile(newTape, tapesFilename);					
 				}
 				else if (newTape->ID - 1 == i) {
-					writeToFile<Tape>(newTape, tapesFilename);					
+					writeToFile(newTape, tapesFilename);					
 				}
 			}
 		}
@@ -116,7 +109,7 @@ void deleteTape() {
 	Tape *tapes;
 	bool deleteTape = false;
 
-	tie(tapes, tapesSize) = readFile<Tape>(tapesFilename);
+	tie(tapes, tapesSize) = readFile(new Tape, tapesFilename);
 	showAllTape();
 		
 	cout << "Enter ID of the tape you want to delete: "; cin >> ID;
@@ -130,10 +123,10 @@ void deleteTape() {
 	}
 
 	if (deleteTape) {
-		truncateTapeFile();
+		truncateFile(tapesFilename);
 		for (int i = 0; i < tapesSize; i++) {
 			if (tapes[i].ID != ID) {
-				writeToFile<Tape>(&tapes[i], tapesFilename);
+				writeToFile(&tapes[i], tapesFilename);
 			}
 		}	
 	}

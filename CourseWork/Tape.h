@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <iomanip>
 #include"Constant.h"
-#include"File.cpp"
+#include"File.h"
 
 void truncateTapeFile();
 void showAllTape();
