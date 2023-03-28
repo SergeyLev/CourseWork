@@ -1,35 +1,17 @@
 #pragma once
+#include<iostream>
+#include<fstream>
+#include<ctime>
+#include<string>
+#include<algorithm>
+#include <iomanip>
+#include <map>
+#include"Constant.h"
+#include"File.h"
+#include"Id.h"
+#include"output.h"
 
 
-struct Date {
-	int day;
-	int month;
-	int year;
-};
-
-struct Clients {
-	int ID;
-	char lastname[25];
-	bool tapeOnLease = 0;
-	char tapeTitle;
-	char returnDate;
-};
-
-
-struct Client {
-	int ID;
-	char name[25];
-	char lastname[25];
-	int phone;
-	char city[25];
-	char street[25];
-	int houseNo;
-	int flat;
-	int zipCode;
-	char tapeOnLease;
-};
-
-
-void addNew();
 void showAll();
-void showOne(int fileID);
+tuple<int, string> addNew();
+tuple<int, string> showClient(int id, string name);

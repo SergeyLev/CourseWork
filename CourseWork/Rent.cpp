@@ -1,13 +1,142 @@
 #pragma once
-#include<iostream>
 #include"Rent.h"
-#include"Client.h"
-#include"Tape.h"
-#include<fstream>
-#include<ctime>
-#include<string>
-#include<ctime>
 using namespace std;
+
+tuple<int, string> clientLookup() {
+	tuple<int, string> clientId;
+	int choice;
+	int searchID;
+	string searchName;
+	
+	system("cls");
+	cout << "Get ID of a Client.\n 1. By Name\n 2. By Id\n 0. Previous menu" << endl;
+	cout << "Your choice: "; cin >> choice;
+	switch (choice) {
+	case 1:
+		system("cls");
+		cout << "Enter clients Name: "; cin >> searchName;
+		clientId = showClient(-1, searchName);
+		break;
+	case 2:
+		system("cls");
+		cout << "Enter clients ID: "; cin >> searchID;
+		clientId = showClient(searchID, "None");
+		break;
+	case 0:
+		break;
+	default:
+		system("cls");
+		cout << "Make sure that you made a correct choice.\nPress any key to continue." << endl;
+		system("pause");
+		break;
+	}
+	return clientId;
+}
+
+tuple<int, string> getClient() {
+	int clientId = 0;
+	int choice;
+	int searchID;
+	string searchName;
+	bool noClientId = true;
+	string clientName;
+
+	while (noClientId)
+	{
+		tie(clientId, clientName) = clientLookup();
+
+		if (clientId == 0) {
+			cout << "No client found.\n 1. Try Again\n 2. Register new\n 0. Exit\n";
+			cout << "Your choice: "; cin >> choice;
+			switch (choice) {
+			case 1:
+				break;
+			case 2:
+				tie(clientId, clientName) = addNew();
+				break;
+			case 0:
+				noClientId = false;
+				break;
+			default:
+				system("cls");
+				cout << "Make sure that you made a correct choice.\nPress any key to continue." << endl;
+				system("pause");
+				break;
+			}
+		}
+		else {
+			cout << "Is client correct?\n 1. Yes\n 2. No\n";
+			cout << "Your choice: "; cin >> choice;
+			switch (choice) {
+			case 1:
+				noClientId = false;
+				break;
+			case 2:
+				break;
+			default:
+				system("cls");
+				cout << "Make sure that you made a correct choice.\nPress any key to continue." << endl;
+				system("pause");
+				break;
+			}
+		}
+	}
+	return make_tuple(clientId, clientName);
+}
+
+tuple<int, string> getTapeId(){
+	int choice;
+	int tapeId = 0;
+	showAllTape();
+	cout << "Is tape available?\n 1. Yes\n 2. No\n";
+	cout << "Your choice: "; cin >> choice;
+	switch (choice) {
+	case 1:
+		cout << "Enter tape ID: "; cin >> tapeId;
+		return getTapeById(tapeId);
+		break;
+	case 2:
+		break;
+	default:
+		system("cls");
+		cout << "Make sure that you made a correct choice.\nPress any key to continue." << endl;
+		system("pause");
+		break;
+	}
+}
+
+int getDuration() {
+	int days = 0;
+	cout << "Enter number of days to rent: "; cin >> days;
+	return days;
+}
+
+
+//SHOW ALL CLIENT WITH TAPES RENTED
+void showAllRent() {
+	int clientsSize;
+	int clientsRentSize;
+	int tapesSize;
+
+	map<int, string> idClient;
+	map<int, string> idTape;
+
+	Client* clients;
+	Rent* rent;
+	Tape* tapes;
+
+	tie(rent, clientsRentSize) = readFile(new Rent);
+	tie(clients, clientsSize) = readFile(new Client);
+	tie(tapes, tapesSize) = readFile(new Tape);
+
+	for (int i = 0; i < clientsRentSize; i++) {
+		idClient.insert({ rent[i].clientId, getById(rent[i].clientId, clients, clientsSize) });
+		idTape.insert({ rent[i].tapeId, getById(rent[i].tapeId, tapes, tapesSize) });
+	}
+
+	show(rent, idClient, idTape, clientsRentSize);
+	system("pause");
+}
 
 char getName(int tapeID) {
 	
@@ -27,7 +156,7 @@ char getName(int tapeID) {
 		file.close();
 
 		for (int i = 0; i < tapeSize; i++) {
-			if (tapes[i].ID == tapeID) {
+			if (tapes[i].Id == tapeID) {
 				return(*tapes[i].title);
 			}
 			else {
@@ -38,74 +167,87 @@ char getName(int tapeID) {
 	return(0);
 }
 
-void newRent(int searchID, char title) {
-	int days;
-	string fileName = to_string(searchID);
+bool newRent() {
+	int choice;
+	int rentDays;
+	int clientId = 0;
+	int tapeId = 0;
+	time_t curr_time;
+	tm* curr_tm;
+	string clientName;
+	string title;
+	Date start;
+	string s;
+	Date end;
+	string e;
+
+	Rent *newRent = new Rent[1];
+
+	// get current date
+	time(&curr_time);
+	curr_tm = localtime(&curr_time);
+	start.day = curr_tm->tm_mday;
+	start.month = curr_tm->tm_mon + 1;
+	start.year = curr_tm->tm_year + 1900;
+	s = to_string(start.day) + "-" + to_string(start.month) + '-' + to_string(start.year);
+
+	// get client id
+	tie(clientId, clientName) = getClient();
+	if (clientId == 0) {
+		cout << "New rent cancelled\n";
+		system("pause");
+		return false;
+	}
+	// get tape id
+	tie(tapeId, title) = getTapeId();
+	if (tapeId == 0) {
+		cout << "New rent cancelled\n";
+		system("pause");
+		return false;
+	}
+
+	// get rent duration
+	rentDays = getDuration();
+	if (rentDays == 0) {
+		cout << "Minimum rent duration is one day.\nNew rent cancelled\n";
+		system("pause");
+		return false;
+	}
 	
-	Client *client = new Client;
+	// calculate return date
+	curr_tm->tm_mday += rentDays;
+	mktime(curr_tm);
+	end.day = curr_tm->tm_mday;
+	end.month = curr_tm->tm_mon + 1;
+	end.year = curr_tm->tm_year + 1900;
+	e = to_string(end.day) + "-" + to_string(end.month) + '-' + to_string(end.year);
 
-	ifstream file;
-	file.open("clients.dat", ios::binary);
-	if (!file) {
-		cout << "File could not be loaded\n";
+	show(clientId, clientName, tapeId, title, s, e);
+	cout << "Start rent?\n 1. Yes\n 2. No\n";
+	cout << "Your choice: "; cin >> choice;
+	switch (choice) {
+	case 1:
+		newRent->clientId = clientId;
+		newRent->tapeId = tapeId;
+		newRent->rentStart = start;
+		newRent->rentEnd = end;
+		writeToFile(newRent);
+		decreaseAmount(tapeId);
+		break;
+	case 2:
+		cout << "New rent cancelled\n";
+		system("pause");
+		break;	
+	default:
+		system("cls");
+		cout << "Make sure that you made a correct choice.\nPress any key to continue." << endl;
+		system("pause");
+		break;
 	}
-	else {
-		file.seekg(0, ios::end);
-		int clientsSize = file.tellg();
-		clientsSize = clientsSize / sizeof(Clients);
-		file.seekg(0, ios::beg);
-		Clients *clients = new Clients[clientsSize];
-		file.read((char*)clients, clientsSize * sizeof(Clients));
-		file.close();
-
-		for (int i = 0; i < clientsSize; i++) {
-			if (clients[i].ID == searchID) {
-				clients[i].tapeOnLease = 1;
-				clients[i].tapeTitle = title;
-				cout << "Number of days to rent: "; cin >> days;
-				time_t t = time(0) + days;
-				struct tm * now = localtime(&t);
-				char date;
-				strftime(&date, sizeof now, "%F %T", now);
-				clients[i].returnDate = date;
-
-				ofstream file;
-				file.open("clients.dat", ios::binary);
-
-				if (!file) {
-					cout << "File could not be loaded\n";
-				}
-				else {
-					file.write((char*)clients, sizeof(Clients));
-					file.close();
-					delete[]clients;
-				}
-			}
-		}
-	}
-
-	file.open("client_" + fileName + ".dat", ios::binary);
-	if (!file) {
-		cout << "File could not be loaded\n";
-	}
-	else {
-		file.seekg(0, ios::end);
-		int clientSize = file.tellg();
-		clientSize = clientSize / sizeof(Client);
-		file.seekg(0, ios::beg);
-		Client *client = new Client[clientSize];
-		file.read((char*)client, clientSize * sizeof(Client));
-		file.close();
-		
-		client->tapeOnLease = title;
-
-		ofstream file;
-		file.open("client_" + fileName + ".dat", ios::binary);
-		file.write((char*)client, sizeof(Client));
-		file.close();
-		delete[]client;
-	}		
+	return true;
 };
+
+
 
 
 void tapeReturn(int searchID) {
@@ -118,14 +260,14 @@ void tapeReturn(int searchID) {
 	else {
 		file.seekg(0, ios::end);
 		int clientsSize = file.tellg();
-		clientsSize = clientsSize / sizeof(Clients);
+		clientsSize = clientsSize / sizeof(Rent);
 		file.seekg(0, ios::beg);
-		Clients *clients = new Clients[clientsSize];
-		file.read((char*)clients, clientsSize * sizeof(Clients));
+		Rent *clients = new Rent[clientsSize];
+		file.read((char*)clients, clientsSize * sizeof(Rent));
 		file.close();
 		for (int i = 0; i < clientsSize; i++) {
-			if (clients[i].ID == searchID) {
-				clients[i].tapeOnLease = 0;
+			if (clients[i].clientId == searchID) {
+				//clients[i].tapeOnLease = 0;
 			}			
 		}
 		ofstream file;

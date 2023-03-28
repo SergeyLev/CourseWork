@@ -101,6 +101,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,13 +141,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="File.cpp" />
+    <ClCompile Include="Id.cpp" />
+    <ClCompile Include="output.cpp" />
     <ClCompile Include="Rent.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Tape.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h" />
+    <ClInclude Include="File.h" />
+    <ClInclude Include="Id.h" />
+    <ClInclude Include="output.h" />
     <ClInclude Include="Rent.h" />
+    <ClInclude Include="Constant.h" />
     <ClInclude Include="Tape.h" />
   </ItemGroup>
   <ItemGroup>

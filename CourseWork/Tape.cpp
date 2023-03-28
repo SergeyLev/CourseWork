@@ -6,44 +6,9 @@ using namespace std;
 //SHOW ALL AVAILABLE TAPES
 void showAllTape() {
 	Tape* tapes; 
-	int tapesSize; 
-	int tapeIdSize = 0;
-	int longestTitle = 0;
-	int amountSize = 0;
-	int hBorderSize = 0;
-	string hBorder;
-	string separator = " | ";
-	string tapeID = separator + "Tape ID";
-	string title = separator + "Title";
-	string amount = separator + "Ammount |";
-
-	tie(tapes, tapesSize) = readFile(new Tape, tapesFilename);
-
-	// Get sizes to construct table
-	tapeIdSize = tapeID.size() - separator.size();
-	for (int i = 0; i < tapesSize; i++) {
-		string tmp(tapes[i].title);
-		longestTitle = tmp.size() > longestTitle ? tmp.size() : longestTitle;
-	}
-	amountSize = amount.size();
-	
-	hBorderSize = tapeIdSize + longestTitle + amountSize + separator.size();
-	hBorder.append(hBorderSize, '_');
-
-	// Build table
-	cout << "  " << hBorder << endl;
-	cout << setw(tapeIdSize) << left << tapeID
-		 << setw(longestTitle + separator.size()) << title  << left
-		 << setw(amountSize) << left << amount  << endl;
-	cout << "  " << hBorder << endl;
-	// Show stock
-	for (int i = 0; i < tapesSize; i++) {
-		cout << separator << setw(tapeIdSize) << left << tapes[i].ID
-			 << separator << setw(longestTitle) << left << tapes[i].title
-			 << separator << setw(amountSize - separator.size() -1) << left << tapes[i].ammount << "|" << endl;
-	}
-	cout << "  " << hBorder << endl << endl;
-
+	int tapesSize;
+	tie(tapes, tapesSize) = readFile(new Tape);
+	show(tapes, tapesSize);
 	system("pause");
 };
 
@@ -51,25 +16,18 @@ void showAllTape() {
 void addNewTape() {
 	int newID = -1;
 	int tapesSize;
-	auto newTape = new Tape[1];	
-	Tape* tapes;
-	bool sortById = false;
+	Tape *newTape = new Tape[1];	
+	Tape *tapes;
+	bool sortById;
 	
-	// Auto generate ID	
-	tie(tapes, tapesSize) = readFile(new Tape, tapesFilename);
-	if (tapesSize == 0) { newID = 1; }
-	else if (tapesSize == 1) { newID = tapes[0].ID + 1; }
+	tie(tapes, tapesSize) = readFile(new Tape);
 
-	// Fill ID "holes" if any
-	for (int i = 0; i < tapesSize - 1; i++) {		
-		if (tapes[i].ID + 1 != tapes[i + 1].ID) { newID = tapes[i].ID + 1; sortById = true; }
-	}
-	// If no "holes" make new ID
-	if (newID == -1) { newID = tapes[tapesSize - 1].ID + 1; }	
+	// Auto generate ID	
+	tie(newID, sortById) = generateID(tapesSize, tapes);
 
 	// Get input
 	string tmpName;
-	newTape->ID = newID;
+	newTape->Id = newID;
 	cout << "Enter the title of the tape: ";		
 	getline(cin >> ws, tmpName);
 	strcpy(newTape->title, tmpName.c_str());
@@ -77,26 +35,13 @@ void addNewTape() {
 	
 	// Save to file
 	if (!sortById) {
-
-		writeToFile(newTape, tapesFilename);		
-		system("cls");
-		cout << "New title: \"" << newTape->title << "\" added to the database." << endl;
+		writeToFile(newTape);
 	}
 	else {
-		truncateFile(tapesFilename);
-		for (int i = 0; i < tapesSize; i++) {
-			for (int j = 0; j < tapesSize; j++) {
-				if (tapes[j].ID - 1 == i) {
-
-					writeToFile(newTape, tapesFilename);					
-				}
-				else if (newTape->ID - 1 == i) {
-					writeToFile(newTape, tapesFilename);					
-				}
-			}
-		}
+		sortWriteToFile(tapesSize, tapes, newTape);
 	}
-
+	system("cls");
+	cout << "New title: \"" << newTape->title << "\" added to the database." << endl;
 	delete[]newTape;	
 	system("pause");
 };
@@ -109,14 +54,14 @@ void deleteTape() {
 	Tape *tapes;
 	bool deleteTape = false;
 
-	tie(tapes, tapesSize) = readFile(new Tape, tapesFilename);
+	tie(tapes, tapesSize) = readFile(new Tape);
 	showAllTape();
 		
 	cout << "Enter ID of the tape you want to delete: "; cin >> ID;
 
 	for (int i = 0; i < tapesSize; i++) {
-		if (tapes[i].ID == ID) {
-			cout << "Tape ID: " << tapes[i].ID << " * Title: " << tapes[i].title << endl;
+		if (tapes[i].Id == ID) {
+			cout << "Tape ID: " << tapes[i].Id << " * Title: " << tapes[i].title << endl;
 			cout << "Delete this tape?\n1. Yes\n2. No\nOption: "; cin >> choice;
 			deleteTape = choice == 1 ? true : false;
 		}
@@ -125,8 +70,8 @@ void deleteTape() {
 	if (deleteTape) {
 		truncateFile(tapesFilename);
 		for (int i = 0; i < tapesSize; i++) {
-			if (tapes[i].ID != ID) {
-				writeToFile(&tapes[i], tapesFilename);
+			if (tapes[i].Id != ID) {
+				writeToFile(&tapes[i]);
 			}
 		}	
 	}
@@ -134,3 +79,39 @@ void deleteTape() {
 	cout << "Deleted";
 	showAllTape();
 };
+
+tuple<int, string> getTapeById(int searchId) {
+	Tape* tapes;
+	int tapesSize;
+	tie(tapes, tapesSize) = readFile(new Tape);
+
+	for (int i = 0; i < tapesSize; i++) {
+		if (tapes[i].Id == searchId) {
+			return make_tuple(tapes[i].Id, tapes[i].title);
+		}
+	}
+	return make_tuple(0, "");
+}
+
+void decreaseAmount(int dId) {
+	Tape* tapes;
+	int tapesSize;
+	tie(tapes, tapesSize) = readFile(new Tape);
+	for (int i = 0; i < tapesSize; i++) {
+		if (tapes[i].Id == dId) {
+			tapes[i].ammount = tapes[i].ammount > 0 ? tapes[i].ammount - 1 : tapes[i].ammount;
+		}
+	}
+	writeToFile(tapes);
+}
+void increaseAmount(int dId) {
+	Tape* tapes;
+	int tapesSize;
+	tie(tapes, tapesSize) = readFile(new Tape);
+	for (int i = 0; i < tapesSize; i++) {
+		if (tapes[i].Id == dId) {
+			tapes[i].ammount = tapes[i].ammount + 1;
+		}
+	}
+	writeToFile(tapes);
+}

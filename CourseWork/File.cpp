@@ -25,13 +25,14 @@ template <typename T> tuple<T*, int> readF(T* fileData, string filename) {
 		return make_tuple(fileData, size);
 	}
 };
-
-tuple<Tape*, int> readFile(Tape* data, const string fileName) {
-	return readF<Tape>(data, fileName);
+tuple<Tape*, int> readFile(Tape* data) {
+	return readF<Tape>(data, tapesFilename);
 };
-
-tuple<Client*, int> readFile(Client* data, const string fileName) {
-	return readF<Client>(data, fileName);
+tuple<Client*, int> readFile(Client* data) {
+	return readF<Client>(data, clientsFilename);
+};
+tuple<Rent*, int> readFile(Rent* data) {
+	return readF<Rent>(data, clientsRentFilename);
 };
 
 
@@ -55,13 +56,46 @@ template <typename T> void writeToF(const T* fileData, string filename) {
 	file.write((char*)fileData, sizeof(T));
 	file.close();
 };
+void writeToFile(const Tape* data) {
+	writeToF<Tape>(data, tapesFilename);
+};
+void writeToFile(const Client* data) {
+	writeToF<Client>(data, clientsFilename);
+};
+void writeToFile(const Rent* data) {
+	writeToF<Rent>(data, clientsRentFilename);
+};
 
-void writeToFile(const Tape* data, const string fileName) {
-	writeToF<Tape>(data, fileName);
+
+void sortWriteToFile(int size, const Tape* data, const Tape* newData) {
+	truncateFile(tapesFilename);
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			if (data[j].Id - 1 == i) {
+
+				writeToFile(newData);
+			}
+			else if (newData->Id - 1 == i) {
+				writeToFile(newData);
+			}
+		}
+	}
 }
+void sortWriteToFile(int size, const Client* data, const Client* newData) {
+	{
+		truncateFile(clientsFilename);
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				if (data[j].Id - 1 == i) {
 
-void writeToFile(const Client* data, const string fileName) {
-	writeToF<Client>(data, fileName);
+					writeToFile(newData);
+				}
+				else if (newData->Id - 1 == i) {
+					writeToFile(newData);
+				}
+			}
+		}
+	}
 }
 
 
@@ -69,4 +103,4 @@ void truncateFile(const string fileName) {
 	ofstream file;
 	file.open(fileName, ios::binary | ios::trunc);
 	file.close();
-}
+};

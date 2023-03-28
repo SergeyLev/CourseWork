@@ -11,13 +11,18 @@ using namespace std;
 
 
 template <typename T> tuple<T*, int> readF(const string);
-tuple<Tape*, int> readFile(Tape* fileData, const string);
-tuple<Client*, int> readFile(Client* fileData, const string);
+tuple<Tape*, int> readFile(Tape* fileData);
+tuple<Client*, int> readFile(Client* fileData);
+tuple<Rent*, int> readFile(Rent* fileData);
 
 
 template <typename T> void writeToF(const T*, string);
-void writeToFile(const Tape*, string);
-void writeToFile(const Client*, string);
+void writeToFile(const Tape*);
+void writeToFile(const Client*);
+void writeToFile(const Rent*);
+
+void sortWriteToFile(int, const Tape*, const Tape*);
+void sortWriteToFile(int, const Client*, const Client*);
 
 
 void truncateFile(const string fileName);

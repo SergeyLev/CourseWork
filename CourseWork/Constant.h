@@ -3,9 +3,11 @@
 using namespace std;
 
 const string tapesFilename = "tapes.dat";
+const string clientsFilename = "clients.dat";
+const string clientsRentFilename = "rent.dat";
 
 const struct Tape {
-	int ID;  // PK
+	int Id;  // PK
 	char title[100];
 	int ammount;
 };
@@ -16,27 +18,21 @@ const struct Date {
 	int year;
 };
 
-const struct Clients {
-	int ID;  // FK -> Client.ID
-	int tapeOnLease;  // FK -> Tape.ID
+
+const struct Rent {
+	int clientId;  // FK -> Client.ID
+	int tapeId;  // FK -> Tape.ID
 	Date rentStart;
 	Date rentEnd;
 };
 
 const struct Client {
-	int ID;  // PK
-	char name[100];
-	char lastname[100];
-	int phone;
+	int Id;  // PK
+	char fullName[100];
+	char phone[25];
 	char city[100];
 	char street[100];
 	int houseNo;
 	int flat;
-	int zipCode;
-	char tapeOnLease;
-};
-
-const struct FileTypes {
-	static Tape TAPE;
-	static Client CLIENT;
+	char zipCode[25];
 };

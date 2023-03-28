@@ -11,12 +11,13 @@
 using namespace std;
 
 int main() {
-	int menu, submenu;
+	int menu, submenu, searchType;
 	int searchID;
 	char title;
 
 	string logo;
 	string logoLine;
+	string searchName;
 	ifstream in;
 	in.open("Text.txt");
 
@@ -50,8 +51,27 @@ int main() {
 					break;
 				case 2:
 					system("cls");
-					cout << "Enter clients ID: "; cin>>searchID;
-					showOne(searchID);
+					cout << "Customers.\n 1. By Name\n 2. By Id\n 0. Previous menu" << endl;
+					cout << "Your choice: "; cin >> searchType;
+					switch (searchType)	{
+					case 1:
+						system("cls");
+						cout << "Enter clients Name: "; cin >> searchName;
+						showClient(-1, searchName);
+						break;
+					case 2:
+						system("cls");
+						cout << "Enter clients ID: "; cin >> searchID;
+						showClient(searchID, "None");
+						break;
+					case 0:
+						break;
+					default:
+						system("cls");
+						cout << "Make sure that you made a correct choice.\nPress any key to continue." << endl;
+						system("pause");
+						break;
+					}
 					break;
 				case 3:
 					system("cls");
@@ -101,17 +121,18 @@ int main() {
 		case 3:
 			do {
 				system("cls");
-				cout << "1. Rent\n 2.Return\n 0. Previous menu" << endl;
-				cin >> submenu;
+				cout << " 1. Show All\n 2. Rent\n 3. Return\n 0. Previous menu" << endl;
+				cout << "Your choice: "; cin >> submenu;
 				switch (submenu){
 				case 1:
 					system("cls");
-					cout << "Enter Tape ID :"; cin >> searchID;
-					title = getName(searchID);
-					cout << "Customer ID: "; cin >> searchID;
-					newRent(searchID, title);
+					showAllRent();
 					break;
 				case 2:
+					system("cls");
+					newRent();
+					break;
+				case 3:
 					system("cls");
 					cout << "Customer ID: "; cin >> searchID;
 					tapeReturn(searchID);
