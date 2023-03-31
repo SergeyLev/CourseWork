@@ -97,21 +97,25 @@ void decreaseAmount(int dId) {
 	Tape* tapes;
 	int tapesSize;
 	tie(tapes, tapesSize) = readFile(new Tape);
+
 	for (int i = 0; i < tapesSize; i++) {
 		if (tapes[i].Id == dId) {
 			tapes[i].ammount = tapes[i].ammount > 0 ? tapes[i].ammount - 1 : tapes[i].ammount;
 		}
 	}
-	writeToFile(tapes);
+
+	changeDataInFile(tapes, tapesSize);
 }
 void increaseAmount(int dId) {
 	Tape* tapes;
 	int tapesSize;
 	tie(tapes, tapesSize) = readFile(new Tape);
+
 	for (int i = 0; i < tapesSize; i++) {
 		if (tapes[i].Id == dId) {
 			tapes[i].ammount = tapes[i].ammount + 1;
 		}
 	}
-	writeToFile(tapes);
+
+	changeDataInFile(tapes, tapesSize);
 }

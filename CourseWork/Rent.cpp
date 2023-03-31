@@ -233,6 +233,8 @@ bool newRent() {
 		newRent->rentEnd = end;
 		writeToFile(newRent);
 		decreaseAmount(tapeId);
+		cout << "Rent successful.\n";
+		system("pause");
 		break;
 	case 2:
 		cout << "New rent cancelled\n";
@@ -248,30 +250,34 @@ bool newRent() {
 };
 
 
-
-
 void tapeReturn(int searchID) {
-	
-	ifstream file;
-	file.open("clients.dat", ios::binary);
-	if (!file) {
-		cout << "File could not be loaded\n";
+	int clientId = 0;
+	int tapeId = 0;
+	string clientName;
+	string title;
+	string returnDateString;
+	time_t curr_time;
+	tm* curr_tm;
+	Date returnDate;
+
+	// get current date
+	time(&curr_time);
+	curr_tm = localtime(&curr_time);
+	returnDate.day = curr_tm->tm_mday;
+	returnDate.month = curr_tm->tm_mon + 1;
+	returnDate.year = curr_tm->tm_year + 1900;
+	returnDateString = to_string(returnDate.day) + "-" + to_string(returnDate.month) + '-' + to_string(returnDate.year);
+
+	// get client id
+	tie(clientId, clientName) = getClient();
+	if (clientId == 0) {
+		cout << "New rent cancelled\n";
+		system("pause");
 	}
-	else {
-		file.seekg(0, ios::end);
-		int clientsSize = file.tellg();
-		clientsSize = clientsSize / sizeof(Rent);
-		file.seekg(0, ios::beg);
-		Rent *clients = new Rent[clientsSize];
-		file.read((char*)clients, clientsSize * sizeof(Rent));
-		file.close();
-		for (int i = 0; i < clientsSize; i++) {
-			if (clients[i].clientId == searchID) {
-				//clients[i].tapeOnLease = 0;
-			}			
-		}
-		ofstream file;
-		file.open("customers.dat", ios::binary);
-		file.close();
+	// get tape id
+	tie(tapeId, title) = getTapeId();
+	if (tapeId == 0) {
+		cout << "New rent cancelled\n";
+		system("pause");
 	}
 }

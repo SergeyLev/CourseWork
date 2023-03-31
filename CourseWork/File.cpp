@@ -81,23 +81,28 @@ void sortWriteToFile(int size, const Tape* data, const Tape* newData) {
 		}
 	}
 }
-void sortWriteToFile(int size, const Client* data, const Client* newData) {
-	{
-		truncateFile(clientsFilename);
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				if (data[j].Id - 1 == i) {
+void sortWriteToFile(int size, const Client* data, const Client* newData) {	
+	truncateFile(clientsFilename);
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			if (data[j].Id - 1 == i) {
 
-					writeToFile(newData);
-				}
-				else if (newData->Id - 1 == i) {
-					writeToFile(newData);
-				}
+				writeToFile(newData);
+			}
+			else if (newData->Id - 1 == i) {
+				writeToFile(newData);
 			}
 		}
 	}
+	
 }
 
+void changeDataInFile(const Tape* tapes, int size) {
+	truncateFile(tapesFilename);
+	for (int i = 0; i < size; i++) {		
+		writeToFile(&tapes[i]);
+	}
+}
 
 void truncateFile(const string fileName) {
 	ofstream file;

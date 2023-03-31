@@ -24,5 +24,6 @@ void writeToFile(const Rent*);
 void sortWriteToFile(int, const Tape*, const Tape*);
 void sortWriteToFile(int, const Client*, const Client*);
 
+void changeDataInFile(const Tape*, int);
 
 void truncateFile(const string fileName);
